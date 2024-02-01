@@ -1,0 +1,43 @@
+kind: pipeline
+type: docker
+name: default
+
+clone:
+  disable: true
+
+steps:
+- name: clone
+  image: plugins/git
+  settings:
+    recursive: true
+- name: build exe
+  image: tobix/pywine:3.12
+  environment:
+    OGT_DOWNLOAD_URL:
+      from_secret: OGT_DOWNLOAD_URL
+  commands:
+    - wine pip install -r requirements.txt
+    - wine create-version-file metadata.yml --outfile version.txt
+    - echo "{\"download_url\":\"$OGT_DOWNLOAD_URL\"}" > ./src/config.json
+    - wine pyinstaller --onefile ./src/ogtweaker.py --add-data ./src/config.json:. --version-file version.txt 
+- name: zip it
+  image: joshkeegan/zip:3.19.1
+  commands:
+    - zip -r ${DRONE_REPO_NAME}-${DRONE_COMMIT_SHA:0:7}.zip ./dist/
+    - chmod 777 ${DRONE_REPO_NAME}-${DRONE_COMMIT_SHA:0:7}.zip
+- name: upload artifacts
+  image: vividboarder/drone-webdav
+  settings:
+    file: ${DRONE_REPO_NAME}-${DRONE_COMMIT_SHA:0:7}.zip
+    destination:
+      from_secret: WEBDAV_PATH
+    username:
+      from_secret: WEBDAV_USER
+    password:
+      from_secret: WEBDAV_PASSWORD
+
+trigger:
+  branch:
+  - main
+  event:
+  - push
