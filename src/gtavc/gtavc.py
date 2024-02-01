@@ -25,7 +25,7 @@ class Gtavc:
             "Fix common graphic and gameplay issues",
             "Improve draw distance",
             "Add proper controller support",
-            "Make NPCs more talktative, like in PS2 version"
+            "Make NPCs more talkative, like in PS2 version",
             "Add graphic effects from PS2 and Xbox (optional)",
             "Improve LOD (optional)",
             "HD intro movies (optional)"
@@ -42,6 +42,8 @@ class Gtavc:
         ui.list_continue_menu(
             'List of tweaks that OGtweaker will perform:',
             tweaks)
+
+        tweaker.remove_readonly_attrib(game_dir)
 
         tweaker.download_unzip(
             f'{download_url}/gtavc/gtavc-base-tweaks.zip',

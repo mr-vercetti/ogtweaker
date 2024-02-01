@@ -5,6 +5,7 @@ import requests
 import tempfile
 import shutil
 import json
+import stat
 from ui import UI
 from logger import logger
 from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
@@ -197,15 +198,26 @@ class Tweaker:
 
     def edit_ini(self, file, changes):
         import configparser
+        try:
+            config = configparser.ConfigParser()
+            # Don't change letters to lowercase
+            config.optionxform = lambda option: option
+            config.read(file)
+    
+            for section, keys in changes.items():
+                for key, value in keys.items():
+                    config.set(section, key, str(value))
+    
+            with open(file, 'w') as config_file:
+                config.write(config_file)
+        except (OSError, PermissionError) as e:
+            logger.error(f'{e} - Try again as admin')
 
-        config = configparser.ConfigParser()
-        # Don't change letters to lowercase
-        config.optionxform = lambda option: option
-        config.read(file)
-
-        for section, keys in changes.items():
-            for key, value in keys.items():
-                config.set(section, key, str(value))
-
-        with open(file, 'w') as config_file:
-            config.write(config_file)
+    def remove_readonly_attrib(self, dir):
+        try:
+            for root, dirs, files in os.walk(dir):
+                for file_name in files:
+                    file_path = os.path.join(root, file_name)
+                    os.chmod(file_path, stat.S_IWRITE)
+        except PermissionError as e:
+            logger.error(f'{e} - Try again as admin')
