@@ -194,3 +194,18 @@ class Tweaker:
             logger.error(f'Unable to check if {path} exists')
             self.ui.continue_menu()
         return exists
+
+    def edit_ini(self, file, changes):
+        import configparser
+
+        config = configparser.ConfigParser()
+        # Don't change letters to lowercase
+        config.optionxform = lambda option: option
+        config.read(file)
+
+        for section, keys in changes.items():
+            for key, value in keys.items():
+                config.set(section, key, str(value))
+
+        with open(file, 'w') as config_file:
+            config.write(config_file)

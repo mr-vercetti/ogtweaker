@@ -1,6 +1,7 @@
 import sys
 from ui import UI
 from mohaa.mohaa import Mohaa
+from gtavc.gtavc import Gtavc
 
 
 def main():
@@ -10,6 +11,7 @@ def main():
         'Welcome to OGtweaker!',
         [
             'MoH Allied Assault',
+            'Grand Theft Auto Vice City',
             'Exit'
             ])
 
@@ -18,6 +20,9 @@ def main():
     elif main_option == 'MoH Allied Assault':
         mohaa = Mohaa()
         mohaa.main()
+    elif main_option == 'Grand Theft Auto Vice City':
+        gtavc = Gtavc()
+        gtavc.main()
 
 
 if __name__ == "__main__":
